@@ -153,3 +153,8 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'mygoodlife29@gmail.com'
 EMAIL_HOST_PASSWORD = 'rgpc csna ilec txsz'   # app password
+
+if os.environ.get("CREATE_SUPERUSER") == "1":
+    User = get_user_model()
+    if not User.objects.filter(username="admin").exists():
+        User.objects.create_superuser("admin", "admin@example.com", "adminpass123")
