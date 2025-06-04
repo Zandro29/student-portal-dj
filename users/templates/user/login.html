@@ -1,0 +1,68 @@
+{% load static %}
+<html data-bs-theme="light" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
+    <title>Login - Brand</title>
+    <link rel="stylesheet" href="{% static 'assets/bootstrap/css/bootstrap.min.css' %}">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i&amp;display=swap">
+    <link rel="stylesheet" href="{% static 'assets/fonts/fontawesome-all.min.css' %}">
+</head>
+
+<body class="bg-gradient-primary">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-9 col-lg-12 col-xl-10">
+                <div class="card shadow-lg o-hidden border-0 my-5">
+                    <div class="card-body p-0">
+                        <div class="row">
+                            <div class="col-lg-6 d-none d-lg-flex">
+                                <div class="w-100 d-flex justify-content-center align-items-center"
+                                    style="min-height: 100%; padding: 20px;">
+                                    <img class="img-fluid" src="{% static 'assets/img/logo/logo.jpg' %}"
+                                        alt="Login Image" style="max-height: 250px;">
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="p-5">
+                                    <div class="text-center">
+                                        <h4 class="text-dark mb-4">Welcome Back!</h4>
+                                    </div>
+                                    {% if form.errors %}
+                                    <div class="alert alert-danger" role="alert">
+                                        Invalid username or password. Please try again.
+                                    </div>
+                                    {% endif %}
+
+                                    <form method="POST" novalidate>
+                                        {% csrf_token %}
+                                        {% for field in form %}
+                                        <div class="mb-3">
+                                            <label for="{{ field.id_for_label }}"
+                                                class="form-label">{{ field.label }}</label>
+                                            {{ field }}
+                                            {% if field.errors %}
+                                            <div class="text-danger small">{{ field.errors|striptags }}</div>
+                                            {% endif %}
+                                        </div>
+                                        {% endfor %}
+                                        <button type="submit" class="btn btn-primary w-100">Login</button>
+                                    </form>
+
+                                    <div class="text-center mt-3">
+                                        <small>Don't have an account? <a href="{% url 'register' %}">Register
+                                                here</a></small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

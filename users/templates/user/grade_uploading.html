@@ -1,0 +1,159 @@
+{% extends './bootsraphead.html' %}
+
+{% block content %}
+{% load extras %}
+<div class="card shadow">
+    <div class="card-header py-3">
+        <p class="text-primary m-0 fw-bold">Upload Grades for Section: {{ schedule.section.name }}</p>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6 text-nowrap">
+                <div id="dataTable_length" class="dataTables_length" aria-controls="dataTable"><label
+                        class="form-label">Show <select class="d-inline-block form-select form-select-sm">
+                            <option value="10" selected>10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select></label></div>
+            </div>
+            <div class="col-md-6">
+                <div id="dataTable_filter" class="text-md-end dataTables_filter"><label class="form-label"><input
+                            class="form-control form-control-sm" type="search" aria-controls="dataTable"
+                            placeholder="Search" /></label></div>
+            </div>
+        </div>
+        <div id="dataTable" class="table-responsive table mt-2" role="grid" aria-describedby="dataTable_info">
+            <!-- <form method="post" action="{% url 'grade_uploaded' schedule.id %}">
+                {% csrf_token %}
+                <table id="dataTable" class="table my-0">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Subject</th>
+                            <th>Unit</th>
+                            <th>Midterm</th>
+                            <th>Final</th>
+                            <th>Re-Exam</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for enrollment in students %}
+                        <tr>
+                            <td>{{ enrollment.student.get_full_name }}</td>
+                            <td>{{ enrollment.schedule.subject.name }}</td>
+                            <td>{{ enrollment.schedule.subject.units }}</td>
+                            <td><input type="number" name="midterm_{{ enrollment.id }}" class="form-control" step="0.01"
+                                    min="0" max="100"></td>
+                            <td><input type="number" name="final_{{ enrollment.id }}" class="form-control" step="0.01"
+                                    min="0" max="100"></td>
+                            <td><input type="number" name="reexam_{{ enrollment.id }}" class="form-control" step="0.01"
+                                    min="0" max="100"></td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6">No students enrolled in this section.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <button type="submit" class="btn btn-primary">Submit Grades</button>
+            </form>
+
+            {% if grades_summary %}
+            <hr>
+            <h4>Grades Summary</h4>
+            <table class="table table-bordered mt-3">
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Midterm</th>
+                        <th>Final</th>
+                        <th>Re-Exam</th>
+                        <th>Final Grade</th>
+                        <th>Remarks</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for grade in grades_summary %}
+                    <tr>
+                        <td>{{ grade.student }}</td>
+                        <td>{{ grade.midterm }}</td>
+                        <td>{{ grade.final }}</td>
+                        <td>{{ grade.reexam }}</td>
+                        <td>{{ grade.final_grade }}</td>
+                        <td>{{ grade.remarks }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% endif %} -->
+            <form method="post" action="{% url 'grade_uploaded' schedule.id %}">
+                {% csrf_token %}
+                <table id="dataTable" class="table my-0">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Subject</th>
+                            <th>Unit</th>
+                            <th>Midterm</th>
+                            <th>Final</th>
+                            <th>Re-Exam</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for enrollment in students %}
+                        {% with grades_dict|get_item:enrollment.id as grade %}
+                        <tr>
+                            <td>{{ enrollment.student.get_full_name }}</td>
+                            <td>{{ enrollment.schedule.subject.name }}</td>
+                            <td>{{ enrollment.schedule.subject.units }}</td>
+                            <td>
+                                <input type="number" name="midterm_{{ enrollment.id }}" class="form-control"
+                                    value="{{ grade.midterm|default_if_none:'' }}"
+                                    {% if grade.midterm is not None %}readonly{% endif %}>
+                            </td>
+                            <td>
+                                <input type="number" name="final_{{ enrollment.id }}" class="form-control"
+                                    value="{{ grade.final|default_if_none:'' }}"
+                                    {% if grade.final is not None %}readonly{% endif %}>
+                            </td>
+                            <td>
+                                <input type="number" name="reexam_{{ enrollment.id }}" class="form-control"
+                                    value="{{ grade.reexam|default_if_none:'' }}"
+                                    {% if grade.reexam is not None %}readonly{% endif %}>
+                            </td>
+                        </tr>
+                        {% endwith %}
+                        {% empty %}
+                        <tr>
+                            <td colspan="6">No students enrolled.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <button type="submit" class="btn btn-primary">Submit Grades</button>
+            </form>
+        </div>
+        <div class="row">
+            <div class="col-md-6 align-self-center">
+                <p id="dataTable_info" class="dataTables_info" role="status" aria-live="polite">Showing 1 to 10 of 27
+                </p>
+            </div>
+            <div class="col-md-6">
+                <nav class="d-lg-flex justify-content-lg-end dataTables_paginate paging_simple_numbers">
+                    <ul class="pagination">
+                        <li class="page-item disabled"><a class="page-link" aria-label="Previous" href="#"><span
+                                    aria-hidden="true">«</span></a></li>
+                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                        <li class="page-item"><a class="page-link" href="#">2</a></li>
+                        <li class="page-item"><a class="page-link" href="#">3</a></li>
+                        <li class="page-item"><a class="page-link" aria-label="Next" href="#"><span
+                                    aria-hidden="true">»</span></a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

@@ -1,0 +1,35 @@
+{% extends './bootsraphead.html' %}
+{% block content %}
+<h2>Your Grades</h2>
+
+{% for term, grades in grades_by_term.items %}
+    <h4>{{ term }}</h4>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Subject</th>
+                <th>Midterm</th>
+                <th>Final</th>
+                <th>Re-Exam</th>
+                <th>Final Grade</th>
+                <th>Remarks</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for grade in grades %}
+            <tr>
+                <td>{{ grade.schedule.subject.name }}</td>
+                <td>{{ grade.midterm|default:"-" }}</td>
+                <td>{{ grade.final|default:"-" }}</td>
+                <td>{{ grade.reexam|default:"-" }}</td>
+                <td>{{ grade.final_grade|default:"-" }}</td>
+                <td>{{ grade.remarks|default:"-" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% empty %}
+    <p>No grades available yet.</p>
+{% endfor %}
+
+{% endblock %}

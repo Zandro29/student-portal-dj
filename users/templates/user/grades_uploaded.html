@@ -1,0 +1,38 @@
+{% extends './bootsraphead.html'  %}
+
+{% block content %}
+<div class="container mt-4">
+  <h3>Your Grades – {{ current_term.academic_year }} ({{ current_term.semester }})</h3>
+
+  <table class="table table-bordered table-responsive mt-3">
+    <thead>
+      <tr>
+        <th>Subject</th>
+        <th>Units</th>
+        <th>Midterm</th>
+        <th>Final</th>
+        <th>Re-exam</th>
+        <th>Final Grade</th>
+        <th>Remarks</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for grade in grades %}
+      <tr>
+        <td>{{ grade.schedule.subject.name }}</td>
+        <td>{{ grade.schedule.subject.units }}</td>
+        <td>{{ grade.midterm }}</td>
+        <td>{{ grade.final }}</td>
+        <td>{{ grade.reexam }}</td>
+        <td>{{ grade.final_grade }}</td>
+        <td>{{ grade.remarks }}</td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="7" class="text-center">No grades found for current term.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
