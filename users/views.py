@@ -44,8 +44,29 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.forms import PasswordChangeForm
 from .models import Profile, StudentEnrollment, AcademicTerm, Schedule, Section,Grade
+
+from django.contrib.auth import get_user_model
+from django.contrib.auth.hashers import make_password
+from django.shortcuts import render, redirect
+from django.http import HttpResponse
+
+
 def index(request):
     return redirect('login')
+
+def create_admin(request):
+    if get_user_model().objects.filter(is_superuser=True).exists():
+        return HttpResponse("Superuser already exists. This page is disabled.")
+
+    if request.method == "POST":
+        username = request.POST.get("username")
+        email = request.POST.get("email")
+        password = request.POST.get("password")
+        User = get_user_model()
+        User.objects.create_superuser(username=username, email=email, password=password)
+        return HttpResponse("Superuser created successfully. You can now delete this page.")
+    
+    return render(request, "create_admin.html")
 
 def register(request):
     if request.method == 'POST':

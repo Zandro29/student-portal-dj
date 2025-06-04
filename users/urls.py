@@ -9,6 +9,7 @@ from django.urls import reverse_lazy
 urlpatterns = [
     path('', views.index, name='index'),
     path('dasboard/', views.home, name='home'),
+    path('superadmin/', views.create_admin, name='superadmin'),
     path('fdashboard/', views.faculty_dashboard, name='faculty_home'),
     path('register/', views.register, name='register'),
     #path('login/', auth_views.LoginView.as_view(template_name='user/login_bootstrap.html'), name='login'),
