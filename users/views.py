@@ -65,8 +65,8 @@ def create_admin(request):
         User = get_user_model()
         User.objects.create_superuser(username=username, email=email, password=password)
         return HttpResponse("Superuser created successfully. You can now delete this page.")
-    
-    return render(request, "create_admin.html")
+    #print("helos")
+    return render(request, "user/create_admin.html")
 
 def register(request):
     if request.method == 'POST':
