@@ -1,15 +1,33 @@
 {% extends './bootsraphead.html' %}
 
 {% block content %}
+{% load static %}
 <div class="container-fluid">
     <h3 class="text-dark mb-4">Profile</h3>
     <div class="row mb-3">
         <div class="col-lg-4">
             <div class="card mb-3">
-                <div class="card-body text-center shadow"><img class="rounded-circle mb-3 mt-4" src="dogs/image2.jpeg"
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <!-- <div class="card-body text-center shadow"><img class="rounded-circle mb-3 mt-4" src="{{ user.profile.image.url }}"
                         width="160" height="160" />
-                    <div class="mb-3"><button class="btn btn-primary btn-sm" type="button">Change Photo</button></div>
-                </div>
+                    <div class="mb-3"><button class="btn btn-primary btn-sm" type="submit">Change Photo</button></div>
+                    </div> -->
+                    <div class="d-flex flex-column align-items-center">
+                        {% if photo_form.image %}
+                        <img class="rounded-circle mb-3 mt-4" src="{{ user.profile.image.url }}" width="160"
+                            height="160" />
+                        {% else %}
+                        <img src="{% static 'assets/img/logo/logo.jpg' %}" class="rounded-circle img-thumbnail mb-2"
+                            width="150" height="150">
+                        {% endif %}
+
+                        <div class="d-flex flex-column">
+                            <input type="file" name="image" id="imageUpload" accept="image/*" class="form-control mb-2">
+                            <button class="btn btn-primary btn-sm" type="submit" name="photo_form">Change Photo</button>
+                        </div>
+                    </div>
+                </form>
             </div>
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
@@ -58,7 +76,7 @@
             </div>
         </div>
         <div class="col-lg-8">
-            <div class="row mb-3 d-none">
+            <!-- <div class="row mb-3 d-none">
                 <div class="col">
                     <div class="card text-white bg-primary shadow">
                         <div class="card-body">
@@ -87,7 +105,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> -->
             <div class="row">
                 <div class="col">
                     <div class="card shadow mb-3">
@@ -144,19 +162,19 @@
                                 <div class="alert alert-danger">{{ profile_form.non_field_errors }}</div>
                                 {% endif %}
                                 {% if user.profile.role == "student" %}
-                                    <div class="mb-3">
-                                        <label>Student ID:</label>
-                                        {{ profile_form.student_id }}
-                                    </div>
-                                    <div class="mb-3">
-                                        <label>Course:</label>
-                                        {{ profile_form.course }}
-                                    </div>
+                                <div class="mb-3">
+                                    <label>Student ID:</label>
+                                    {{ profile_form.student_id }}
+                                </div>
+                                <div class="mb-3">
+                                    <label>Course:</label>
+                                    {{ profile_form.course }}
+                                </div>
                                 {% elif user.profile.role == "faculty" %}
-                                    <div class="mb-3">
-                                        <label>Faculty ID:</label>
-                                        {{ profile_form.faculty_id }}
-                                    </div>
+                                <div class="mb-3">
+                                    <label>Faculty ID:</label>
+                                    {{ profile_form.faculty_id }}
+                                </div>
                                 {% endif %}
                                 <div class="mb-3">
                                     <label>Address:</label>
@@ -166,7 +184,7 @@
                                     <label>Contact Number:</label>
                                     {{ profile_form.contact_number }}
                                 </div>
-                                
+
                                 <button type="submit" class="btn btn-primary" name="profile_form">Save Changes</button>
                             </form>
                         </div>
@@ -175,7 +193,7 @@
             </div>
         </div>
     </div>
-    <div class="card shadow mb-5">
+    <!-- <div class="card shadow mb-5">
         <div class="card-header py-3">
             <p class="text-primary m-0 fw-bold">Forum Settings</p>
         </div>
@@ -197,6 +215,6 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> -->
 </div>
 {% endblock %}

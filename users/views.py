@@ -35,7 +35,7 @@ from django.http import HttpResponse, HttpResponseForbidden
 
 
 from django.views.generic import UpdateView
-from .forms import UserUpdateForm, CustomPasswordChangeForm, ProfileForm, CustomLoginForm
+from .forms import UserUpdateForm, CustomPasswordChangeForm, ProfileForm, CustomLoginForm, ProfileImageForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import PasswordChangeView, LoginView
 from django.contrib.auth import update_session_auth_hash
@@ -235,6 +235,16 @@ class UserUpdateView(LoginRequiredMixin, UpdateView):
     def get_object(self):
         return self.request.user
 
+def profile_view(request):
+    if request.method == 'POST':
+        form = ProfileImageForm(request.POST, request.FILES, instance=request.user.profile)
+        if form.is_valid():
+            form.save()
+            return redirect('profile')  # change this to your actual URL name
+    else:
+        form = ProfileImageForm(instance=request.user.profile)
+    
+    return render(request, 'user/profile_pic.html', {'form': form})
 def change_password(request):
     pass
 
@@ -243,7 +253,7 @@ def profile_settings(request):
         user_form = UserUpdateForm(request.POST, instance=request.user)
         password_form = CustomPasswordChangeForm(user=request.user, data=request.POST)
         profile_form = ProfileForm(request.POST, instance=request.user.profile)
-        
+        photo_form = ProfileImageForm(request.POST, request.FILES, instance=request.user.profile)
         print('helo')
         if 'user_form' in request.POST and user_form.is_valid():
             user_form.save()
@@ -265,16 +275,25 @@ def profile_settings(request):
                 return redirect('profile')
             else:
                 print('Profile form invalid:', profile_form.errors)
-
+        elif 'photo_form' in request.POST:
+            if photo_form.is_valid():
+                print("true")
+                photo_form.save()
+                return redirect('profile')
+            else:
+                print('photo form invalid:', profile_form.errors)
         
     else:
         user_form = UserUpdateForm(instance=request.user)
         password_form = CustomPasswordChangeForm(user=request.user)
         profile_form = ProfileForm(instance=request.user.profile)
+        photo_form = ProfileImageForm(request.POST, request.FILES, instance=request.user.profile)
+
     return render(request, 'user/profile.html', {
         'user_form': user_form,
         'password_form': password_form,
         'profile_form': profile_form,
+        'photo_form': photo_form, 
     })
 
 def grade_uploading(request, schedule_id):

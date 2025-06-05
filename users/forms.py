@@ -67,3 +67,8 @@ class CustomLoginForm(AuthenticationForm):
             'placeholder': 'Enter your password'
         })
     )
+
+class ProfileImageForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = ['image']

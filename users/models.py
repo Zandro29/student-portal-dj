@@ -2,6 +2,10 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 
+def user_directory_path(instance, filename):
+    # upload to MEDIA_ROOT/profile_pics/user_<id>/<filename>
+    return f'profile_pics/user_{instance.user.id}/{filename}'
+
 class Profile(models.Model):
     ROLE_CHOICES = [
         ('student', 'Student'),
@@ -12,6 +16,7 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     role = models.CharField(max_length=10, choices=ROLE_CHOICES)
 
+    image = models.ImageField(upload_to=user_directory_path, default='default.jpg')
     #image = models.ImageField(upload_to='profile_photos/', null=True, blank=True)
     # student-specific fields
     student_id = models.CharField(max_length=20, null=True, blank=True)

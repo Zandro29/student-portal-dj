@@ -4,6 +4,8 @@ from . import views
 from .views import StudentLoginView, FacultyLoginView
 from django.contrib.auth.views import PasswordChangeView, PasswordChangeDoneView
 from django.urls import reverse_lazy
+from django.conf import settings
+from django.conf.urls.static import static
 #appname = 'users'
 
 urlpatterns = [
@@ -26,4 +28,8 @@ urlpatterns = [
     path('upload-grades/<int:schedule_id>/', views.grade_upload_view, name='grade_uploaded'),
     path('my-grades/', views.student_grades_view, name='student_grades'),
     #path('profile/edit/', views.edit_profile_view, name='edit_profile'),
+    path('profile-picture/', views.profile_view, name='profile_picture'),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
