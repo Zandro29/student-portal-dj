@@ -149,7 +149,8 @@ class StudentLoginView(LoginView):
         return reverse_lazy('home')
 
 class FacultyLoginView(LoginView):
-    template_name = 'user/faculty_login.html'
+    authentication_form = CustomLoginForm
+    template_name = 'user/login.html'
     print('hello')
     def form_valid(self, form):
         """Check if user has role 'faculty' before allowing login."""
