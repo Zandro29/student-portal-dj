@@ -188,7 +188,7 @@ class StaffLoginView(LoginView):
             messages.error(self.request, "No profile associated with this account.")
             return redirect('login_staff')
     def get_success_url(self):
-        return reverse_lazy('staff_home')
+        return reverse_lazy('login_staff')
 
 
 @login_required

@@ -31,7 +31,7 @@ urlpatterns = [
     path('profile-picture/', views.profile_view, name='profile_picture'),
     path('room-status/', views.get_room_status, name='room_status'),
     path('staff/', StaffLoginView.as_view() , name='login_staff'),
-    path('staff_dashboard/', StaffLoginView.as_view() , name='login_staff'),
+    path('staff_dashboard/', views.staff_dashboard, name='login_staff'),
 ]
 
 
