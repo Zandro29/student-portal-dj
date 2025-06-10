@@ -1,0 +1,24 @@
+{% extends './bootsraphead.html' %}
+{% block content %}
+<h3>Enrollments for {{ student.user.first_name }}</h3>
+<table class="table table-bordered">
+  <thead>
+    <tr>
+      <th>Subject</th>
+      <th>Section</th>
+      <th>Room</th>
+      <th>Schedule</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for enrollment in enrollments %}
+      <tr>
+        <td>{{ enrollment.schedule.subject.name }}</td>
+        <td>{{ enrollment.schedule.section.name }}</td>
+        <td>{{ enrollment.schedule.room.name }}</td>
+        <td>{{ enrollment.schedule.day_of_week }} ({{ enrollment.schedule.start_time }} - {{ enrollment.schedule.end_time }})</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock content %}

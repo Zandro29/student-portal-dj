@@ -32,6 +32,8 @@ urlpatterns = [
     path('room-status/', views.get_room_status, name='room_status'),
     path('staff/', StaffLoginView.as_view() , name='login_staff'),
     path('staff_dashboard/', views.staff_dashboard, name='login_staff'),
+    path('students/', views.students_list, name='students_list'),
+    path('students/<int:student_id>/enrollments/', views.view_enrollments, name='view_enrollments'),
 ]
 
 

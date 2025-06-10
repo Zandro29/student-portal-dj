@@ -9,17 +9,6 @@ from django.db.models import Count
 from collections import defaultdict
 # for normal registration no verification required ---
 
-# def register(request):
-
-#     if request.method == 'POST':
-#         form = CustomUserCreationForm(request.POST)
-#         if form.is_valid():
-#             form.save()
-#             return redirect('login')
-#     else:
-#         form = CustomUserCreationForm()
-#     return render(request, 'user/registerbootstrap.html', {'form': form})
-
 # views.py
 from django.contrib.sites.shortcuts import get_current_site
 from django.urls import reverse
@@ -489,3 +478,13 @@ def get_room_status(request):
         'term': current_term,
     }
     return render(request, 'user/room_status.html', context)
+
+def students_list(request):
+    students = Profile.objects.filter(role='student')
+    return render(request, 'user/students.html', {'students': students})
+
+def view_enrollments(request, student_id):
+    student = Profile.objects.get(id=student_id)
+    enrollments = StudentEnrollment.objects.filter(student=student.user) \
+        .select_related('schedule__subject', 'schedule__section', 'schedule__room')
+    return render(request, 'user/student_enrollments.html', {'student': student, 'enrollments': enrollments})
