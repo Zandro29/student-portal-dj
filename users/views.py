@@ -5,6 +5,8 @@ from .forms import CustomUserCreationForm
 from django.contrib.auth import logout
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
+from django.db.models import Count
+from collections import defaultdict
 # for normal registration no verification required ---
 
 # def register(request):
@@ -43,7 +45,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.forms import PasswordChangeForm
-from .models import Profile, StudentEnrollment, AcademicTerm, Schedule, Section,Grade
+from .models import Profile, StudentEnrollment, AcademicTerm, Schedule, Section,Grade, Room
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import make_password
@@ -168,6 +170,27 @@ class FacultyLoginView(LoginView):
     def get_success_url(self):
         return reverse_lazy('faculty_home')
 
+class StaffLoginView(LoginView):
+    authentication_form = CustomLoginForm
+    template_name = 'user/login_staff.html'
+
+    def form_valid(self, form):
+        """Check if user has role 'student' before allowing login."""
+        user = form.get_user()
+        try:
+            if user.profile.role == 'staff':
+                login(self.request, user)
+                return redirect(self.get_success_url())
+            else:
+                messages.error(self.request, "Only students are allowed to login.")
+                return redirect('login_staff')
+        except Profile.DoesNotExist:
+            messages.error(self.request, "No profile associated with this account.")
+            return redirect('login_staff')
+    def get_success_url(self):
+        return reverse_lazy('staff_home')
+
+
 @login_required
 
 def home(request):
@@ -220,6 +243,9 @@ def faculty_dashboard(request):
         'total_schedules': total_schedules,
         'total_units': total_units,
     })
+
+def staff_dashboard(request):
+    return render(request, 'user/staff_dashboard.html')
 
 def custom_logout(request):
     logout(request)  # This will clear the session
@@ -308,59 +334,64 @@ def grade_uploading(request, schedule_id):
 
     # Get students enrolled in this schedule
     students = StudentEnrollment.objects.filter(schedule=schedule)
-
+    
     return render(request, 'user/grade_uploading.html', {
         'schedule': schedule,
         'students': students,
     })
 
 def grade_upload_view(request, schedule_id):
-  
+    
     enrollments = StudentEnrollment.objects.filter(schedule_id=schedule_id)
-    for enrollment in enrollments:
-        print(enrollment.schedule.subject.name, enrollment.student.get_full_name())
-    grades_dict = {}
-
-    if request.method == 'POST':
+    #enrollments = get_object_or_404(StudentEnrollment, schedule_id=schedule_id)
+    
+    if enrollments.exists():
         for enrollment in enrollments:
-            midterm = request.POST.get(f'midterm_{enrollment.id}')
-            final = request.POST.get(f'final_{enrollment.id}')
-            reexam = request.POST.get(f'reexam_{enrollment.id}')
+            print(enrollment.schedule.subject.name, enrollment.student.get_full_name())
+        grades_dict = {}
 
-            grade, _ = Grade.objects.get_or_create(
-                schedule=enrollment.schedule,
-                student=enrollment.student,
-                defaults={'academic_term': enrollment.schedule.academic_term}
-            )
+        if request.method == 'POST':
+            for enrollment in enrollments:
+                midterm = request.POST.get(f'midterm_{enrollment.id}')
+                final = request.POST.get(f'final_{enrollment.id}')
+                reexam = request.POST.get(f'reexam_{enrollment.id}')
+
+                grade, _ = Grade.objects.get_or_create(
+                    schedule=enrollment.schedule,
+                    student=enrollment.student,
+                    defaults={'academic_term': enrollment.schedule.academic_term}
+                )
 
             # Only update if values are not empty
-            grade.midterm = midterm if midterm else None
-            grade.final = final if final else None
-            grade.reexam = reexam if reexam else None
+                grade.midterm = midterm if midterm else None
+                grade.final = final if final else None
+                grade.reexam = reexam if reexam else None
 
             
             # Just to be sure old records also have academic_term
-            if not grade.academic_term:
-                grade.academic_term = enrollment.schedule.academic_term
+                if not grade.academic_term:
+                    grade.academic_term = enrollment.schedule.academic_term
 
-            grade.save()
+                grade.save()
 
     # Fetch grades for pre-filling form fields
-    for enrollment in enrollments:
-        try:
-            grade = Grade.objects.get(schedule=enrollment.schedule, student=enrollment.student)
-        except Grade.DoesNotExist:
-            grade = None
+        for enrollment in enrollments:
+            try:
+                grade = Grade.objects.get(schedule=enrollment.schedule, student=enrollment.student)
+            except Grade.DoesNotExist:
+                grade = None
 
-        grades_dict[enrollment.id] = grade
+            grades_dict[enrollment.id] = grade
 
-    context = {
-        'students': enrollments,
-        'schedule': enrollments.first().schedule if enrollments.exists() else None,
-        'grades_dict': grades_dict,
-    }
+        context = {
+            'students': enrollments,
+            'schedule': enrollments.first().schedule if enrollments.exists() else None,
+            'grades_dict': grades_dict,
+        }
 
-    return render(request, 'user/grade_uploading.html', context)
+        return render(request, 'user/grade_uploading.html', context)
+    else:
+        return HttpResponse("No students enrolled in this schedule.")
 
 def gradesTable(request):
     user = request.user
@@ -393,3 +424,68 @@ def student_grades_view(request):
     return render(request, 'user/grades.html', {
         'grades_by_term': grades_by_term
     })
+
+def has_conflict(schedule, others):
+    """Check if a schedule conflicts with any from the list (same room and day)."""
+    for other in others:
+        if other.id == schedule.id:
+            continue
+        if (
+            schedule.start_time < other.end_time and
+            schedule.end_time > other.start_time
+        ):
+            return True
+    return False
+
+def get_room_status(request):
+    current_term = AcademicTerm.objects.filter(is_current=True).first()
+
+    schedules = Schedule.objects.filter(academic_term=current_term) \
+        .annotate(enrolled_count=Count('studentenrollment')) \
+        .select_related('room', 'section', 'subject')
+
+    # Detect conflicts
+    schedule_list = []    
+    duplicates_map = defaultdict(list)
+
+    for sched in schedules:
+    # Use a manual comparison instead of QuerySet filter
+        same_day_schedules = [s for s in schedules if s.room == sched.room and s.day_of_week == sched.day_of_week]
+    
+        conflict = False
+        for other in same_day_schedules:
+            if sched.id == other.id:
+                continue
+            if sched.start_time <= other.end_time and sched.end_time >= other.start_time:
+                conflict = True
+                break
+        sched.conflict = conflict
+        sched.is_full = sched.enrolled_count >= sched.room.capacity
+        # Duplicate detection key
+        duplicate_key = (
+            sched.room_id,
+            sched.section_id,
+            sched.subject_id,
+            sched.day_of_week,
+            sched.start_time.strftime('%H:%M'),
+            sched.end_time.strftime('%H:%M'),
+        )
+        duplicates_map[duplicate_key].append(sched)
+
+        schedule_list.append(sched)
+
+    for sched in schedule_list:
+        sched.is_duplicate = False  # initialize
+     # Mark duplicates
+    for duplicate_schedules in duplicates_map.values():
+        if len(duplicate_schedules) > 1:
+            for sched in duplicate_schedules:
+                sched.is_duplicate = True
+        else:
+            duplicate_schedules[0].is_duplicate = False
+
+    context = {
+        'schedules': schedule_list,
+        'term': current_term,
+    }
+    return render(request, 'user/room_status.html', context)

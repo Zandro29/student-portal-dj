@@ -1,7 +1,7 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
 from . import views 
-from .views import StudentLoginView, FacultyLoginView
+from .views import StudentLoginView, FacultyLoginView, StaffLoginView
 from django.contrib.auth.views import PasswordChangeView, PasswordChangeDoneView
 from django.urls import reverse_lazy
 from django.conf import settings
@@ -29,7 +29,11 @@ urlpatterns = [
     path('my-grades/', views.student_grades_view, name='student_grades'),
     #path('profile/edit/', views.edit_profile_view, name='edit_profile'),
     path('profile-picture/', views.profile_view, name='profile_picture'),
+    path('room-status/', views.get_room_status, name='room_status'),
+    path('staff/', StaffLoginView.as_view() , name='login_staff'),
+    path('staff_dashboard/', StaffLoginView.as_view() , name='login_staff'),
 ]
+
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

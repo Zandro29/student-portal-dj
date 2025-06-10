@@ -36,10 +36,17 @@
                     {% endif %}
                     <li class="nav-item"><a class="nav-link" href="{% url 'profile' %}"><i
                                 class="fas fa-user"></i><span>Profile</span></a></li>
+                    {% if user.profile.role == 'student' %}
                     <li class="nav-item"><a class="nav-link" href="{% url 'student_grades' %}"><i
                                 class="fas fa-table"></i><span>Grades</span></a></li>
+                    {% endif %}
+                    {% if user.profile.role == 'staff' %}
+                    <li class="nav-item"><a class="nav-link" href="{% url 'room_status' %}"><i
+                                class="far fa-user-circle"></i><span>Rooms</span></a></li>
+                    {% endif %}
                     <li class="nav-item"><a class="nav-link" href="{% url 'logout' %}"><i
                                 class="far fa-user-circle"></i><span>Log-out</span></a></li>
+                    
                 </ul>
                 <div class="text-center d-none d-md-inline"><button class="btn rounded-circle border-0"
                         id="sidebarToggle" type="button"></button></div>

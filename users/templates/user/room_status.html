@@ -1,0 +1,61 @@
+{% extends './bootsraphead.html' %}
+
+{% block content %}
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>Room</th>
+                <th>Subject</th>
+                <th>Section</th>
+                <th>Schedule</th>
+                <th>Enrolled Students</th>
+                <th>Capacity</th>
+                <th>Status</th>
+                <th>Conflict</th> <!-- NEW -->
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for schedule in schedules %}
+            <tr>
+                <td>{{ schedule.room.room_number }}</td>
+                <td>{{ schedule.subject.name }}</td>
+                <td>{{ schedule.section.name }}</td>
+                <td>{{ schedule.day_of_week }} ({{ schedule.start_time }} - {{ schedule.end_time }})</td>
+                <td>{{ schedule.enrolled_count }}</td>
+                <td>
+                    {% if sched.is_full %}
+                    <span class="badge bg-danger">Full</span>
+                    {% else %}
+                    <span class="badge bg-success">Open</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if schedule.enrolled_count > 0 %}
+                    <span class="badge bg-danger">Occupied</span>
+                    {% else %}
+                    <span class="badge bg-success">Available</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if schedule.conflict %}
+                    <span class="badge bg-warning text-dark">Conflict</span>
+                    {% else %}
+                    <span class="badge bg-success">Clear</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if schedule.is_duplicate %}
+                    <span class="badge bg-warning text-dark">Duplicate</span>
+                    {% else %}
+                    <span class="badge bg-success">Unique</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+
+    </table>
+</div>
+{% endblock content %}
