@@ -2,14 +2,23 @@
 {% block content %}
 <!-- DataTables CSS -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
 
-<!-- jQuery (required) -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-<!-- DataTables JS -->
+<!-- jQuery and DataTables JS -->
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 
-<table id="myTable" class="display">
+<!-- DataTables Buttons Extension -->
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+
+<!-- File support for buttons -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.68/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.68/vfs_fonts.js"></script>
+
+<table id="studentTable" class="display">
     <thead>
         <tr>
             <th>User Name</th>
@@ -25,7 +34,7 @@
             <td>{{ student.user.first_name }} {{ student.user.last_name }}</td>
             <td>{{ student.user.email }}</td>
             <td>
-                <a href="{% url 'view_enrollments' student.user.id %}" class="btn btn-sm btn-primary">
+                <a href="{% url 'student_enrollments' student.user.id %}" class="btn btn-sm btn-primary">
                     View Enrollments
                 </a>
             </td>
@@ -35,8 +44,14 @@
 </table>
 
 <script>
-  $(document).ready(function () {
-    $('#myTable').DataTable();
-  });
+    $(document).ready(function () {
+        $('#studentTable').DataTable({
+            dom: 'Bfrtip',
+            buttons: ['copy', 'csv', 'excel', 'pdf', 'print'],
+            responsive: true,
+            pageLength: 10
+        });
+    });
 </script>
+
 {% endblock content %}

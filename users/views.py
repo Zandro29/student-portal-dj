@@ -488,3 +488,50 @@ def view_enrollments(request, student_id):
     enrollments = StudentEnrollment.objects.filter(student=student.user) \
         .select_related('schedule__subject', 'schedule__section', 'schedule__room')
     return render(request, 'user/student_enrollments.html', {'student': student, 'enrollments': enrollments})
+
+def student_enrollments(request, student_id):
+    student_user = get_object_or_404(User, pk=student_id)
+    profile = get_object_or_404(Profile, user=student_user)
+
+    current_term = AcademicTerm.objects.get(is_current=True)
+    current_enrollments = StudentEnrollment.objects.filter(student=profile.user, schedule__academic_term=current_term)
+ 
+    if request.method == 'POST':
+        subject_id = request.POST.get('subject_id')
+        section_id = request.POST.get('section_id')
+        schedule_id = request.POST.get('schedule_id')
+
+        schedule = get_object_or_404(Schedule, id=schedule_id)
+
+        # Prevent duplicate enrollment
+        exists = StudentEnrollment.objects.filter(
+            student=profile.user,
+            schedule=schedule
+        ).exists()
+
+        if not exists:
+            StudentEnrollment.objects.create(
+                student=profile.user,
+                schedule=schedule,
+            )
+
+        return redirect('student_enrollments', student_id=student_id)
+
+    available_schedules = Schedule.objects.filter(academic_term=current_term)
+
+    context = {
+        'student': profile,
+        'current_enrollments': current_enrollments,
+        'available_schedules': available_schedules,
+    }
+    return render(request, 'user/student_enrollments.html', context)
+
+def remove_enrollment(request, enrollment_id):
+    enrollment = get_object_or_404(StudentEnrollment, id=enrollment_id)
+    student_id = enrollment.student.id
+
+    if request.method == 'POST':
+        enrollment.delete()
+        messages.success(request, "Enrollment removed successfully.")
+    
+    return redirect('student_enrollments', student_id=student_id)

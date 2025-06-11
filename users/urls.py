@@ -33,7 +33,10 @@ urlpatterns = [
     path('staff/', StaffLoginView.as_view() , name='login_staff'),
     path('staff_dashboard/', views.staff_dashboard, name='login_staff'),
     path('students/', views.students_list, name='students_list'),
-    path('students/<int:student_id>/enrollments/', views.view_enrollments, name='view_enrollments'),
+    #path('students/<int:student_id>/enrollments/', views.view_enrollments, name='view_enrollments'),
+    path('students/<int:student_id>/enrollments/', views.student_enrollments, name='student_enrollments'),
+    path('enrollment/<int:enrollment_id>/remove/', views.remove_enrollment, name='remove_enrollment'),
+
 ]
 
 

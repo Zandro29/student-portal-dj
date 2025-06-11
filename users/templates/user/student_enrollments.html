@@ -1,24 +1,90 @@
 {% extends './bootsraphead.html' %}
 {% block content %}
-<h3>Enrollments for {{ student.user.first_name }}</h3>
-<table class="table table-bordered">
+<!-- Select2 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Select2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<h3>Current Enrollments for {{ student.user.username }}</h3>
+<table class="table table-striped">
   <thead>
     <tr>
       <th>Subject</th>
       <th>Section</th>
       <th>Room</th>
       <th>Schedule</th>
+      <th>Action</th>
     </tr>
   </thead>
   <tbody>
-    {% for enrollment in enrollments %}
-      <tr>
-        <td>{{ enrollment.schedule.subject.name }}</td>
-        <td>{{ enrollment.schedule.section.name }}</td>
-        <td>{{ enrollment.schedule.room.name }}</td>
-        <td>{{ enrollment.schedule.day_of_week }} ({{ enrollment.schedule.start_time }} - {{ enrollment.schedule.end_time }})</td>
-      </tr>
+    {% for enrollment in current_enrollments %}
+    <tr>
+      <td>{{ enrollment.schedule.subject.name }}</td>
+      <td>{{ enrollment.schedule.section.name }}</td>
+      <td>{{ enrollment.schedule.room.name }}</td>
+      <td>{{ enrollment.schedule.day_of_week }} {{ enrollment.schedule.start_time }} -
+        {{ enrollment.schedule.end_time }}</td>
+      <td><form method="post" action="{% url 'remove_enrollment' enrollment.id %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+        </form></td>
+    </tr>
     {% endfor %}
   </tbody>
 </table>
+
+<h4>Enroll in a New Subject</h4>
+<!-- <form method="post">
+  {% csrf_token %}
+  <select class="form-select" aria-label="Default select example" name="schedule_id" required>
+    {% for sched in available_schedules %}
+    <option value="{{ sched.id }}">
+      {{ sched.subject.name }} - {{ sched.section.name }} ({{ sched.day_of_week }} {{ sched.start_time }} -
+      {{ sched.end_time }})
+    </option>
+    {% endfor %}
+  </select>
+  <button class="btn btn-primary btn-sm" type="submit">Enroll</button>
+</form> -->
+<form method="post">
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Subject</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+          {% csrf_token %}
+          <select class="form-select select2" name="schedule_id" required style="width: 100%;">
+            {% for sched in available_schedules %}
+            <option value="{{ sched.id }}">
+              {{ sched.subject.name }} - {{ sched.section.name }} ({{ sched.day_of_week }} {{ sched.start_time }} -
+              {{ sched.end_time }})
+            </option>
+            {% endfor %}
+          </select>
+      </td>
+      <td>
+        <button class="btn btn-primary" type="submit">Enroll</button>
+      </td>
+
+    </tr>
+  </tbody>
+</table>
+</form>
+<script>
+  $(document).ready(function () {
+    $('.select2').select2({
+      placeholder: "Search for a subject...",
+      allowClear: true
+    });
+  });
+</script>
 {% endblock content %}
